@@ -20,13 +20,6 @@ spec:
                 name: service2-service
                 port:
                   number: 80
-          - path: /api/untested-request
-            pathType: Prefix
-            backend:
-              service:
-                name: root-service-service
-                port:
-                  number: 80
           - path: /api/root-service
             pathType: Prefix
             backend:

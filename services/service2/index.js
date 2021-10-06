@@ -9,7 +9,7 @@ const server = http.createServer((req, res) => {
       res.end("Hello from service2");
     }, flag ? 10000 : 0)
   }
-  else if (req.url === '/api/untested-request') {
+  else if (req.url === '/api/service2/untested-request') {
     flag = true
     res.writeHead(200)
     res.end();
