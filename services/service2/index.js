@@ -1,13 +1,24 @@
 const http = require("http");
 
+let flag = false
 const server = http.createServer((req, res) => {
+  console.log(req.url)
   if (req.url === "/api/service2") {
-    res.writeHead(200);
-    res.write("Hello from service2");
-  } else {
-    res.writeHead(404);
+    setTimeout(() => {
+      res.writeHead(200)
+      res.end("Hello from service2");
+    }, flag ? 10000 : 0)
   }
-  res.end();
+  else if (req.url === '/api/untested-request') {
+    flag = true
+    res.writeHead(200)
+    res.end();
+  }
+  else {
+    res.writeHead(404);
+    res.end();
+  }
+
 });
 
 server.listen(8080);
