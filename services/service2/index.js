@@ -1,24 +1,28 @@
-const http = require("http");
+//const http = require("http");
+const { Kafka } = require("kafkajs")
 
-let flag = false
-const server = http.createServer((req, res) => {
-  console.log(req.url)
-  if (req.url === "/api/service2") {
-    setTimeout(() => {
-      res.writeHead(200)
-      res.end("Hello from service2");
-    }, flag ? 10000 : 0)
-  }
-  else if (req.url === '/api/service2/untested-request') {
-    flag = true
-    res.writeHead(200)
-    res.end();
-  }
-  else {
-    res.writeHead(404);
-    res.end();
-  }
+// the client ID lets kafka know who's producing the messages
+const clientId = "service2"
+// we can define the list of brokers in the cluster
+const brokers = ["kafka:9092"]
+// this is the topic to which we want to write messages
+const topic = "message-log"
 
-});
+const kafka = new Kafka({ clientId, brokers })
 
-server.listen(8080);
+const consumer = kafka.consumer({ groupId: clientId })
+
+const consume = async () => {
+	// first, we wait for the client to connect and subscribe to the given topic
+	await consumer.connect()
+	await consumer.subscribe({ topic })
+	await consumer.run({
+		// this function is called every time the consumer gets a new message
+		eachMessage: ({ message }) => {
+			// here, we just log the message to the standard output
+			console.log(`received message: ${message.value}`)
+		},
+	})
+}
+
+consume();

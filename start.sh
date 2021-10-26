@@ -1,4 +1,4 @@
-minikube start --driver=docker
+#minikube start --driver=docker
 eval $(minikube docker-env)
 minikube addons enable ingress
 
@@ -11,6 +11,10 @@ kubectl apply -f k8s/service1
 kubectl apply -f k8s/service2
 kubectl apply -f k8s/root-service
 kubectl apply -f k8s/client
+kubectl apply -f k8s/zookeeper
+kubectl apply -f k8s/kafka
+kubectl apply -f k8s/demo-storage
+kubectl apply -f k8s/postgres
 
 kubectl apply -f k8s/ingress.yaml
-sudo minikube tunnel
+#sudo minikube tunnel

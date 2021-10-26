@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: service1-deployment
 spec:
-  replicas: 4                      # кількість екземплярів Pod, що буде створено цим Deployment
+  replicas: 1                      # кількість екземплярів Pod, що буде створено цим Deployment
   selector:
     matchLabels:
       app: service1                # селектор по якому Deployment зв'язаний з Pod

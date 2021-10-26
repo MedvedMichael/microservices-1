@@ -1,17 +1,54 @@
-import http from "http"
-import fetch from 'node-fetch'
+//const http = require("http");
+const { Kafka } = require("kafkajs")
 
-const server = http.createServer(async (req, res) => {
-  if (req.url === "/api/root-service") {
-    const resultService1 = await (await fetch('http://service1-service/api/service1')).text()
-    const resultService2 = await (await fetch('http://service2-service/api/service2')).text()
-    res.writeHead(200, {'Content-Type': 'application/json'});
-    res.write(JSON.stringify({res1: resultService1, res2: resultService2}));
-  } else {
-    console.log('404')
-    res.writeHead(404);
-  }
-  res.end();
-});
+// the client ID lets kafka know who's producing the messages
+const clientId = "root-service"
+// we can define the list of brokers in the cluster
+const brokers = ["kafka:9092"]
+// this is the topic to which we want to write messages
+const topic = "message-log"
 
-server.listen(8080);
+const kafka = new Kafka({ clientId, brokers })
+const producer = kafka.producer()
+
+const produce = async () => {
+	await producer.connect()
+	let i = 0
+
+	// after the produce has connected, we start an interval timer
+	setInterval(async () => {
+		try {
+			// send a message to the configured topic with
+			// the key and value formed from the current value of `i`
+			await producer.send({
+				topic,
+				messages: [
+					{
+						key: String(i),
+						value: "this is message " + i,
+					},
+				],
+			})
+
+			// if the message is written successfully, log it and increment `i`
+			console.log("writes: ", i)
+			i++
+		} catch (err) {
+			console.error("could not write message " + err)
+		}
+	}, 1000)
+}
+
+// const server = http.createServer((req, res) => {
+//   if (req.url === "/api/service1") {
+//     res.writeHead(200);
+//     res.write("Hello from service1");
+//   } else {
+//     res.writeHead(404);
+//   }
+//   res.end();
+// });
+
+produce();
+
+// server.listen(8080);
