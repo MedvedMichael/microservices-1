@@ -1,28 +1,38 @@
-//const http = require("http");
-const { Kafka } = require("kafkajs")
+import { Kafka } from "kafkajs";
+import fetch from "node-fetch";
+const setTimeoutPromise = (time) =>
+  new Promise((resolve) => {
+    setTimeout(() => resolve(), time);
+  });
+const tryFetch = async (path) => {
+  try {
+    const result = await fetch(path).then((data) => data.text());
+    return JSON.parse(result.split("=>").join(":"));
+  } catch (error) {
+    console.log(error);
+    return await setTimeoutPromise(1000).then(() => tryFetch(path));
+  }
+};
+(async () => {
+  const env = await tryFetch("http://webapp:8080");
 
-// the client ID lets kafka know who's producing the messages
-const clientId = "service2"
-// we can define the list of brokers in the cluster
-const brokers = ["kafka:9092"]
-// this is the topic to which we want to write messages
-const topic = "message-log"
+  const clientId = "service2";
+  const brokers = [env.broker];
+  const topic = env.topic;
 
-const kafka = new Kafka({ clientId, brokers })
+  const kafka = new Kafka({ clientId, brokers });
 
-const consumer = kafka.consumer({ groupId: clientId })
+  const consumer = kafka.consumer({ groupId: clientId });
 
-const consume = async () => {
-	// first, we wait for the client to connect and subscribe to the given topic
-	await consumer.connect()
-	await consumer.subscribe({ topic })
-	await consumer.run({
-		// this function is called every time the consumer gets a new message
-		eachMessage: ({ message }) => {
-			// here, we just log the message to the standard output
-			console.log(`received message: ${message.value}`)
-		},
-	})
-}
+  const consume = async () => {
+    await consumer.connect();
+    await consumer.subscribe({ topic });
+    await consumer.run({
+      eachMessage: ({ message }) => {
+        console.log(`received message: ${message.value}`);
+      },
+    });
+  };
 
-consume();
+  consume();
+})();

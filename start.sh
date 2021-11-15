@@ -15,6 +15,9 @@ kubectl apply -f k8s/zookeeper
 kubectl apply -f k8s/kafka
 kubectl apply -f k8s/demo-storage
 kubectl apply -f k8s/postgres
+kubectl apply -f k8s/vault
 
 kubectl apply -f k8s/ingress.yaml
 #sudo minikube tunnel
+
+kubectl port-forward $(kubectl get pod -l app=vault -o jsonpath="{.items[0].metadata.name}") 8080:8080
